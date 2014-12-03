@@ -13,7 +13,7 @@ H_FILES = bits.h constants.h debug.h fifo.h rr.h timer_interrupt.h	\
 BINARIES = test_rr_preempt test_rr_nopreempt test_fifo test_table
 
 ################################################################################
-CFLAGS  = -Wall -g -O0 
+CFLAGS  = -Wall -Wextra -g -O0 
 LDFLAGS = -lrt
 CC      = gcc
 

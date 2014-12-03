@@ -11,7 +11,10 @@
 #include "constants.h"
 #include<ucontext.h>
 #include<stdint.h>
+#include <time.h>
 
+/* Id of the last thread created */
+extern uint32_t um_thread_index;
 /******************************************************************************/
 /* Thread entities                                                            */
 
@@ -27,6 +30,7 @@ typedef struct {                /* thread control block   */
   stack_size_t   stack_size;
   priority_t     priority;
   thread_state_t state;
+  struct timespec awaken_date;
 } um_thread_t;
 
 extern um_thread_t threads[MAX_THREADS];
@@ -50,6 +54,9 @@ ucontext_t *get_context (um_thread_id tid);
 
 ucontext_t *get_current_context (void);
 um_thread_id get_current_context_id (void);
+
+
+void um_delay(uint32_t d_ms);
 
 /******************************************************************************/
 /* Scheduler                                                                  */

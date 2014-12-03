@@ -7,7 +7,7 @@
 #include "debug.h"
 #include "um_threads.h"
 #include "timer_interrupt.h"
-
+#include<time.h>
 /******************************************************************************/
 um_thread_t threads[MAX_THREADS];
 
@@ -99,7 +99,13 @@ void scheduler(void)
 {
   um_thread_id previous = sched_current_context_id;
 
-  threads[sched_current_context_id].state = READY;  
+  /* 
+     if the thread is not waiting something, the we move 
+     it back from RUNNING to READY
+  */
+  if(threads[sched_current_context_id].state != IDLE) {
+    threads[sched_current_context_id].state = READY;  
+  }
   sched_current_context_id = the_scheduler ();
 
   sched_context = get_context (sched_current_context_id);
@@ -114,10 +120,46 @@ void scheduler(void)
 
 /******************************************************************************/
 void um_thread_yield (void) {
-  TODO(Exercise 2)
+  scheduler();
 }
 
 /******************************************************************************/
 void configure_scheduler (scheduler_function s) {
   the_scheduler = s;
+}
+/******************************************************************************/
+#define milliard 1000000000
+
+/*d_ms must be < 999 */
+
+void um_delay(uint32_t d_ms){
+  if(d_ms>0){
+    um_thread_id id = get_current_context_id();
+    struct timespec time;
+
+    clock_gettime(CLOCK_REALTIME, &time);
+
+    //    debug_printf("Now Time %ld seconds and %ld nanoseconds.\n", time.tv_sec, time.tv_nsec);
+    
+    time.tv_sec+=d_ms/1000;
+    time.tv_nsec+=(d_ms % 1000)*1000000;
+
+    if(time.tv_nsec > milliard){
+      time.tv_sec+=1;
+    }
+    time.tv_nsec%=milliard;
+    print_timestamp();
+    debug_printf("Thread %u going to sleep for %u",id,d_ms);
+    debug_printf(" Should be back at ");
+    print_timespec(time);
+    printf ("\n");
+
+    threads[id].awaken_date = time ;
+    threads[id].state = IDLE;
+    
+    setup_timer(d_ms,false);
+
+    //we need to reschedule right now
+    scheduler();
+  }
 }

@@ -3,6 +3,6 @@
 
 void user_thread(void);
 void user_thread_no_preempt(void);
-
+void user_thread_delay();
 /******************************************************************************/
 #endif /* __USER_CODE_H__ */

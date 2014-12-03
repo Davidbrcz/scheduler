@@ -17,7 +17,9 @@ int main (int argc, char **argv) {
   initialize_period();               /* initialize workload simulator         */
   configure_rr_scheduler(500);       /* configure round robin scheduler       */
 
-  TODO(Exercise 1)
+  um_thread_create(&user_thread,0,128);
+  um_thread_create(&user_thread,0,128);
+  um_thread_create(&user_thread,0,128);
   
   start_scheduler();                 /* force a swap to the first context     */
   
