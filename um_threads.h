@@ -12,6 +12,13 @@
 #include<ucontext.h>
 #include<stdint.h>
 #include <time.h>
+#include<signal.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/time.h>
+
+#include "debug.h"
+#include "timer_interrupt.h"
 
 /* Id of the last thread created */
 extern uint32_t um_thread_index;
@@ -57,7 +64,8 @@ um_thread_id get_current_context_id (void);
 
 
 void um_delay(uint32_t d_ms);
-
+long long difftime_timespec(struct timespec t1,struct timespec t0);
+bool timespec_lowereq_than(struct timespec t0,struct timespec t1);
 /******************************************************************************/
 /* Scheduler                                                                  */
 

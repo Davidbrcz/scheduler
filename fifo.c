@@ -4,22 +4,6 @@
 #include "um_threads.h"
 #include "timer_interrupt.h"
 
-long long difftime_timespec(struct timespec t1,struct timespec t0){
-  long long diff = 0;
-
-  /* 
-  diff+=(t1.tv_sec-t0.tv_sec)*1000*1000*1000;
-  diff+=t1.tv_nsec-t0.tv_nsec;
-  */
-  /*  diff = t1.tv_nsec-t0.tv_nsec;
-  if(diff<0){
-    diff+=1000*1000*1000;
-  }
-  return diff;*/
-  return (t1.tv_sec - t0.tv_sec)*1000*1000*1000 +
-	  t1.tv_nsec - t0.tv_nsec;
-}
-
 /******************************************************************************/
 um_thread_id scheduler_fifo (void) {
 
@@ -35,11 +19,18 @@ um_thread_id scheduler_fifo (void) {
   for (i = 0; i <  um_thread_index; ++i)
   {
     diff = difftime_timespec(current_time,threads[i].awaken_date);
-    if(threads[i].state == IDLE && diff >= 0)
+    bool r = timespec_lowereq_than(threads[i].awaken_date,current_time);
+    //    if(threads[i].state == IDLE && diff >= 0)
+    if(threads[i].state == IDLE )
       {
-	print_timespec(current_time);
-	debug_printf("Thread %zu going back to READY ( missed by %lld )\n",i,diff);
-	threads[i].state = READY;  
+	//	debug_printf("Thread %zu going back to READY ( missed by %lld )\n",i,diff);
+	debug_printf("Thread %zu ( missed by %lld )\n",i,diff);
+	if(r){
+	  print_timespec(current_time);
+	  debug_printf("Thread %zu goig back ready\n",i);
+	  threads[i].state = READY;  
+	  threads[i].awaken_date =  null_time;
+	}
       }
   }
   for(i = 1 ; i < um_thread_index; ++i)  {
@@ -48,6 +39,7 @@ um_thread_id scheduler_fifo (void) {
 	  elected_thread=i;
       }
   }
+  um_delay(0);
 
   return elected_thread;
 }

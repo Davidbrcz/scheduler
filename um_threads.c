@@ -7,7 +7,7 @@
 #include "debug.h"
 #include "um_threads.h"
 #include "timer_interrupt.h"
-#include<time.h>
+#include <time.h>
 /******************************************************************************/
 um_thread_t threads[MAX_THREADS];
 
@@ -18,6 +18,7 @@ ucontext_t *sched_context;         /* a pointer to the running thread         */
 
 scheduler_function the_scheduler;
 
+const struct timespec null_time = {0,0};
 /******************************************************************************/
 um_thread_id um_thread_create
 (void (*function)(void), 
@@ -61,7 +62,7 @@ um_thread_id um_thread_create
   threads[um_thread_index].tid = um_thread_index;
   threads[um_thread_index].priority = priority;
   threads[um_thread_index].state = READY;
-  
+  threads[um_thread_index].awaken_date =  null_time;
   debug_printf("Created thread context: %p, tid %d, function %p\n", 
 	 &(threads[um_thread_index].um_context), threads[um_thread_index].tid, 
 	 function);
@@ -130,34 +131,98 @@ void configure_scheduler (scheduler_function s) {
 /******************************************************************************/
 #define milliard 1000000000
 
-/*d_ms must be < 999 */
+void compute_awaken_time(struct timespec* time,uint32_t d_ms)
+{
+   time->tv_sec+=d_ms/1000;
+    time->tv_nsec+=(d_ms % 1000)*1000000;
 
-void um_delay(uint32_t d_ms){
-  if(d_ms>0){
-    um_thread_id id = get_current_context_id();
-    struct timespec time;
-
-    clock_gettime(CLOCK_REALTIME, &time);
-    
-    time.tv_sec+=d_ms/1000;
-    time.tv_nsec+=(d_ms % 1000)*1000000;
-
-    if(time.tv_nsec > milliard){
-      time.tv_sec+=1;
+    if(time->tv_nsec > milliard){
+      time->tv_sec+=1;
     }
-    time.tv_nsec%=milliard;
-    print_timestamp();
-    debug_printf("Thread %u going to sleep for %u",id,d_ms);
-    debug_printf(" Should be back at ");
-    print_timespec(time);
-    debug_printf ("\n");
 
-    threads[id].awaken_date = time ;
-    threads[id].state = IDLE;
-    
-    setup_timer(d_ms,false);
+    time->tv_nsec%=milliard;
+}
+/*Compute duration between t1 and t0 in ns. t1 is after t0*/
+long long difftime_timespec(struct timespec t1,struct timespec t0){
 
-    //we need to reschedule right now
-    scheduler();
+  long long diff = t1.tv_nsec - t0.tv_nsec;
+  if(t1.tv_sec > t0.tv_sec){
+    diff+=1000*1000*1000;
   }
+
+  return diff;
+}
+
+/*
+  True it t0 is before t1
+*/
+bool timespec_lowereq_than(struct timespec t0,struct timespec t1){
+  if(t0.tv_sec < t1.tv_sec) {
+    return true;
+  }else if(t0.tv_sec > t1.tv_sec){
+    return false;
+  }else { /*same second*/
+    if(t0.tv_nsec <= t1.tv_nsec) {
+      return true;
+    }else if(t0.tv_nsec > t1.tv_nsec){
+      return false;
+    }
+  }
+}
+
+bool valid_awaken_date(struct timespec t){
+  return (t.tv_sec > 0) && (t.tv_nsec > 0);
+}
+
+/*d_ms must be < 999 */
+void um_delay(uint32_t d_ms){
+ 
+
+  um_thread_id id = get_current_context_id();
+  struct timespec time,original_time;
+  clock_gettime(CLOCK_REALTIME, &original_time);
+  time=original_time;
+
+  compute_awaken_time(&time,d_ms); 
+
+  /*******/
+  print_timestamp();
+  debug_printf("Thread %u going to sleep for %u",id,d_ms);
+  debug_printf(" Should be back at ");
+  print_timespec(time);
+  debug_printf ("\n");
+  /*******/
+
+  threads[id].awaken_date = time ;
+  threads[id].state = IDLE;
+
+  long long delay = 0;
+  size_t i = 0;
+  size_t last_i=get_current_context_id();
+
+  for (i = 0; i < um_thread_index; ++i)
+    {
+      if(!valid_awaken_date(threads[i].awaken_date)) {
+	debug_printf("@@ thread %zu not legit for wake up \n",i);
+	continue;
+      }
+
+      if(timespec_lowereq_than(threads[i].awaken_date,time)){
+	time=threads[i].awaken_date;
+	debug_printf("@@ thread %zu wakes before %zu \n",i,last_i);
+	last_i=i;
+      }
+    }
+
+  delay = difftime_timespec(time,original_time) / (1000*1000);
+  debug_printf("Timer setup for thread %zu and %lld ms \n",last_i,delay);
+
+  //we need setup the timer to the lowest time in order to not miss any deadline
+  setup_timer(delay,false);
+
+ if(d_ms==0)
+   return;
+  //we need to reschedule right now
+  scheduler();
+  
 }
