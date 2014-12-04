@@ -138,8 +138,6 @@ void um_delay(uint32_t d_ms){
     struct timespec time;
 
     clock_gettime(CLOCK_REALTIME, &time);
-
-    //    debug_printf("Now Time %ld seconds and %ld nanoseconds.\n", time.tv_sec, time.tv_nsec);
     
     time.tv_sec+=d_ms/1000;
     time.tv_nsec+=(d_ms % 1000)*1000000;
@@ -152,7 +150,7 @@ void um_delay(uint32_t d_ms){
     debug_printf("Thread %u going to sleep for %u",id,d_ms);
     debug_printf(" Should be back at ");
     print_timespec(time);
-    printf ("\n");
+    debug_printf ("\n");
 
     threads[id].awaken_date = time ;
     threads[id].state = IDLE;

@@ -10,6 +10,6 @@ void print_timestamp (void) {
 }
 
 void print_timespec(struct timespec tp){
-  debug_printf  ("[%d.%ld] ", (int) tp.tv_sec % 1000, tp.tv_nsec/CLOCKS_PER_SEC);
+  debug_printf  ("[%d.%03ld] ", (int) tp.tv_sec % 1000, tp.tv_nsec/CLOCKS_PER_SEC);
 }
 /******************************************************************************/
