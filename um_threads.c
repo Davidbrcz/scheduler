@@ -97,6 +97,7 @@ void start_scheduler (void) {
 /* The scheduling algorithm; selects the next context to run, then starts it. */
 void scheduler(void)
 {
+  debug_printf("-----\n");
   um_thread_id previous = sched_current_context_id;
 
   /* 
@@ -117,6 +118,7 @@ void scheduler(void)
 	       previous, sched_current_context_id);
   
   setcontext(sched_context); /* go */
+  debug_printf("-----\n");
 }
 
 /******************************************************************************/
@@ -268,5 +270,6 @@ void um_delay(uint32_t d_ms){
   threads[id].state = IDLE;
 
   //we need to reschedule right now
-  scheduler();
+  // scheduler();
+  setup_timer(1,false);
 }

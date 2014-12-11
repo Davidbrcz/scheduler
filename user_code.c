@@ -30,7 +30,7 @@ void user_thread_no_preempt(void) {
       debug_printf ("* %d\n", my_id);
       compute_during_n_times_100ms (1);
     }
-    um_thread_yield ();
+    um_thread_yield();
   }
 }
 

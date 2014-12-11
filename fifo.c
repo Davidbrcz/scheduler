@@ -6,6 +6,7 @@
 
 /******************************************************************************/
 void update_thread_status(){
+  // setup_timer(0,false):
   size_t i;
 
   struct timespec current_time;
@@ -41,8 +42,8 @@ void update_thread_status(){
 um_thread_id scheduler_fifo (void) {
 
   size_t i;
-  um_thread_id elected_thread = 1+get_current_context_id()%2;
-  //  um_thread_id elected_thread = get_current_context_id();
+  //um_thread_id elected_thread = 1+get_current_context_id()%2;
+  um_thread_id elected_thread = get_current_context_id();
   
   update_thread_status();
   
