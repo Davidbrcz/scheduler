@@ -95,14 +95,13 @@ void start_scheduler (void) {
 
 /******************************************************************************/
 /* The scheduling algorithm; selects the next context to run, then starts it. */
-
 void scheduler(void)
 {
   um_thread_id previous = sched_current_context_id;
 
   /* 
      if the thread is not waiting something, the we move 
-     it back from RUNNING to READY
+     it back from RUNNING to READY. Update for question 5.
   */
   if(threads[sched_current_context_id].state != IDLE) {
     threads[sched_current_context_id].state = READY;  
@@ -113,6 +112,7 @@ void scheduler(void)
   threads[sched_current_context_id].state = RUNNING;  
 
   print_timestamp();
+
   debug_printf("Swithching from %d to %d\n", 
 	       previous, sched_current_context_id);
   
@@ -232,9 +232,11 @@ void timer_lowest_awken_date(){
     }
 
   long long delay = difftime_timespec(time,current_time) / 1000;
-  debug_printf("Timer setup for thread %zu and %lld ms \n",last_i,delay);
+  debug_printf("Timer setup for thread %zu and %lld ms  ",last_i,delay);
+  compute_awaken_time(&current_time,delay); 
+  print_timespec(current_time);
+  debug_printf ("\n");
 
-  //we need setup the timer to the lowest time in order to not miss any deadline
   setup_timer(delay,false);
 }
 

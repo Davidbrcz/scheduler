@@ -17,7 +17,7 @@ void update_thread_status(){
   bool need_to_setup_timer = false;
   for (i = 0; i <  um_thread_index; ++i)
   {
-    if(threads[i].state == IDLE )
+    if(threads[i].state == IDLE)
       {
 	//If current time is after the awaken time, the the thread is going back up
 	//bool r = timespec_lowereq_than(threads[i].awaken_date,current_time);
@@ -41,8 +41,9 @@ void update_thread_status(){
 um_thread_id scheduler_fifo (void) {
 
   size_t i;
-  um_thread_id elected_thread = 0;
-
+  um_thread_id elected_thread = 1+get_current_context_id()%2;
+  //  um_thread_id elected_thread = get_current_context_id();
+  
   update_thread_status();
   
   for(i = 0 ; i < um_thread_index; ++i)  {
@@ -57,7 +58,7 @@ um_thread_id scheduler_fifo (void) {
 
 /******************************************************************************/
 void configure_fifo_scheduler (void) {
-  configure_scheduler(scheduler_fifo); /* initialize the scheduler            */
+  configure_scheduler(&scheduler_fifo); /* initialize the scheduler            */
 }
 
 /******************************************************************************/
