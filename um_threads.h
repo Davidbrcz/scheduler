@@ -61,14 +61,16 @@ ucontext_t *get_context (um_thread_id tid);
 
 ucontext_t *get_current_context (void);
 um_thread_id get_current_context_id (void);
+/*****************************************************************************/
+extern const struct timespec infinite_time;
 
-
+bool is_same_date(struct timespec t1,struct timespec t2);
+void timer_lowest_awken_date();
 void um_delay(uint32_t d_ms);
 long long difftime_timespec(struct timespec t1,struct timespec t0);
 bool timespec_lowereq_than(struct timespec t0,struct timespec t1);
 /******************************************************************************/
 /* Scheduler                                                                  */
-
 typedef um_thread_id (* scheduler_function) (void);
 
 void configure_scheduler (scheduler_function s);

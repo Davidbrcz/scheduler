@@ -43,7 +43,7 @@ void user_thread_delay(void) {
   while (1) {
     for (i = 0; i< 5; i++) {
       debug_printf ("* %d\n", my_id);
-      compute_during_n_times_100ms (1);
+      compute_during_n_times_100ms(1);
     }
     um_delay(my_id*300);
   }
