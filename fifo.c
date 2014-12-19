@@ -6,7 +6,7 @@
 
 /******************************************************************************/
 void update_thread_status(){
-  // setup_timer(0,false):
+
   size_t i;
 
   struct timespec current_time;
@@ -21,8 +21,6 @@ void update_thread_status(){
     if(threads[i].state == IDLE)
       {
 	//If current time is after the awaken time, the the thread is going back up
-	//bool r = timespec_lowereq_than(threads[i].awaken_date,current_time);
-	//long r = is_same_date(threads[i].awaken_date,current_time);
 	long r =  difftime_timespec(threads[i].awaken_date,current_time);
 	if(r<1000) {
 	  print_timespec(current_time);

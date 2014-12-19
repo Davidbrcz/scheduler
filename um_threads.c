@@ -230,6 +230,8 @@ void timer_lowest_awken_date(){
 	time=threads[i].awaken_date;
 	debug_printf("@@ thread %zu wakes before %d \n",i,last_i);
 	last_i=i;
+      }else{
+	  debug_printf("@@ thread %zu does NOT wake before %d \n",i,last_i);
       }
     }
 
@@ -247,7 +249,8 @@ void timer_lowest_awken_date(){
   d_ms : How long (in ms) the current thread wants to sleep. d_ms must be < 999 
 */
 void um_delay(uint32_t d_ms){
- 
+  //stop the timer ??
+  setup_timer(0,false);  
   if(d_ms==0) {
     return;
   }
@@ -270,6 +273,5 @@ void um_delay(uint32_t d_ms){
   threads[id].state = IDLE;
 
   //we need to reschedule right now
-  // scheduler();
-  setup_timer(1,false);
+  scheduler();
 }

@@ -16,9 +16,11 @@ int main (int argc, char **argv) {
 
   initialize_period();               /* initialize workload simulator         */
 
+  um_thread_create(&user_thread_delay,0,100);
+  um_thread_create(&user_thread_delay,0,255);
   um_thread_create(&user_thread_delay,0,128);
   um_thread_create(&user_thread_delay,0,200);
-  um_thread_create(&user_thread_delay,0,255);
+
 
   configure_fifo_scheduler();
   start_scheduler();                 /* force a swap to the first context     */
