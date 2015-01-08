@@ -249,12 +249,12 @@ void timer_lowest_awken_date(){
   d_ms : How long (in ms) the current thread wants to sleep. d_ms must be < 999 
 */
 void um_delay(uint32_t d_ms){
-  //stop the timer ??
-  setup_timer(0,false);  
   if(d_ms==0) {
     return;
   }
-
+  
+  //stop the timer ??
+  setup_timer(0,false);
   um_thread_id id = get_current_context_id();
 
   struct timespec time;
