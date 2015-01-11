@@ -133,6 +133,7 @@ void configure_scheduler (scheduler_function s) {
 /******************************************************************************/
 #define milliard 1000000000
 
+/* Add d_ms to the date in time */
 void compute_awaken_time(struct timespec* time,uint32_t d_ms)
 {
    time->tv_sec+=d_ms/1000;
@@ -144,7 +145,8 @@ void compute_awaken_time(struct timespec* time,uint32_t d_ms)
 
     time->tv_nsec%=milliard;
 }
-/*Compute duration between t1 and t0 in us. t1 is after t0*/
+
+/*Compute duration between t1 and t0 in us. t1 HAS TO be after t0*/
 long long difftime_timespec(struct timespec t1,struct timespec t0){
 
   long long diff = (t1.tv_nsec - t0.tv_nsec)/1000;
@@ -155,7 +157,7 @@ long long difftime_timespec(struct timespec t1,struct timespec t0){
   return diff;
 }
 
-
+/*return true is t is a valid timespec*/
 bool valid_awaken_date(struct timespec t){
 
   if(t.tv_sec == infinite_time.tv_nsec && t.tv_nsec == infinite_time.tv_nsec) {
@@ -194,6 +196,7 @@ bool timespec_lowereq_than(struct timespec t0,struct timespec t1){
   }
 }
 
+
 bool is_same_date(struct timespec t1,struct timespec t2){
   long s1 = t1.tv_sec % 1000;
   long ms1 = t1.tv_nsec/CLOCKS_PER_SEC;
@@ -208,6 +211,8 @@ bool is_same_date(struct timespec t1,struct timespec t2){
 /*
   This function is called from scheduler_fifo when there is a least a thread that is 
   sleepy . It means there is at least an IDLE thread
+
+It will compute the lowest awaken date and then set up the timer accordingly
 */
 void timer_lowest_awken_date(){
 
@@ -253,7 +258,7 @@ void um_delay(uint32_t d_ms){
     return;
   }
   
-  //stop the timer ??
+  //stop the timer 
   setup_timer(0,false);
   um_thread_id id = get_current_context_id();
 

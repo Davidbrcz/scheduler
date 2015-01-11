@@ -5,6 +5,11 @@
 #include "timer_interrupt.h"
 
 /******************************************************************************/
+/*
+  Will look into the list of threads, put back the IDLE ones which should awake
+  and if there is at least one IDLE thread left, then call timer_lowest_awken_date
+  to compute the date and set the timer
+*/
 void update_thread_status(){
 
   size_t i;
@@ -40,9 +45,8 @@ void update_thread_status(){
 um_thread_id scheduler_fifo (void) {
 
   size_t i;
-  //um_thread_id elected_thread = 1+get_current_context_id()%2;
-  um_thread_id elected_thread = get_current_context_id();
-  
+
+  um_thread_id elected_thread = get_current_context_id();  
   update_thread_status();
   
   for(i = 0 ; i < um_thread_index; ++i)  {
